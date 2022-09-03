@@ -1,9 +1,13 @@
-import Joi from 'joi';
+import Joi, { string } from 'joi';
 
 
-const cardSchema = Joi.object({
+export const cardSchema = Joi.object({
     employeeId: Joi.number().required(),
     cardType: Joi.string().valid('groceries', 'restaurants', 'transport', 'education', 'health').required()
 });
 
-export default cardSchema;
+export const activateCardSchema = Joi.object({
+    cardId: Joi.number().required(),
+    cardCvv: Joi.string().min(3).max(3).required(),
+    password: Joi.string().min(4).max(4).required()
+});

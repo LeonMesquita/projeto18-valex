@@ -5,4 +5,5 @@ export default function throwError(obj: object, name: string){
             message: `${name} not found`
         }
     };
+    
 }
