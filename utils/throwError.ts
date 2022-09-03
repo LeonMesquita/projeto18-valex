@@ -1,9 +1,13 @@
-export default function throwError(obj: object, name: string){
+export function checkDataExists(obj: object, name: string){
     if(!obj){
-        throw{
-            code: 'NotFound',
-            message: `${name} not found`
-        }
+        throwError(404, `${name} not found`);
     };
-    
+}
+
+
+export function throwError(code: number, message: string){
+        throw{
+            code,
+            message
+        }
 }
