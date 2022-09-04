@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { string } from "joi";
 import * as cardService from '../services/cardService';
 
 export async function createCard(req: Request, res: Response){
@@ -66,9 +65,9 @@ export async function unblockCard(req: Request, res: Response){
 
 
 export async function rechargeCard(req: Request, res: Response){
-    const recharge: {cardId: number | string, amount: number | string} = req.body;
+    const recharge: {apiKey: string, cardId: number | string, amount: number | string} = req.body;
     try{
-        await cardService.rechargeCard(Number(recharge.cardId), Number(recharge.amount));
+        await cardService.rechargeCard(recharge.apiKey, Number(recharge.cardId), Number(recharge.amount));
         res.sendStatus(201);
     }catch(e: any){
         if(!e.code) return res.sendStatus(500);

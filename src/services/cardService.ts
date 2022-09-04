@@ -4,6 +4,7 @@ import * as employeeRepository from '../repositories/employeeRepository';
 import * as rechargeRepository from '../repositories/rechargeRepository';
 import {throwError, checkDataExists} from '../../utils/throwError';
 import { checkIsExpired, setHolderName, checkCardValidity } from '../../utils/cardUtils';
+import * as companyUtils from '../../utils/companyUtils';
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
 import Cryptr from 'cryptr';
@@ -12,8 +13,7 @@ const cryptr = new Cryptr('myTotallySecretKey');
 
 
 export async function createCard(apiKey: any, employeeId: number, cardType: any){
-    const company = await companyRepository.findByApiKey(apiKey);
-    checkDataExists(company, 'Company');
+    const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const employee = await employeeRepository.findById(employeeId);
     checkDataExists(employee, 'Employee');
     const number: string = faker.finance.account();
@@ -74,8 +74,12 @@ export async function blockAndUnblock(cardId: number, password: string, operatio
 }
 
 
-export async function rechargeCard(cardId: number, amount: number){
+
+
+export async function rechargeCard(apiKey: string, cardId: number, amount: number){
+    const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const card = await checkCardValidity(cardId);
+    const employee = await companyUtils.checkIsCompanyEmployee(card.employeeId, company.id);
     await rechargeRepository.insert({cardId, amount});
 
 }
