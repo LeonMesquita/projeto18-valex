@@ -4,6 +4,7 @@ import * as employeeRepository from '../repositories/employeeRepository';
 import * as rechargeRepository from '../repositories/rechargeRepository';
 import {throwError, checkDataExists} from '../../utils/throwError';
 import { checkIsExpired, setHolderName, checkCardValidity } from '../../utils/cardUtils';
+import { getRechargesAndBalance } from '../../utils/rechargeUtils';
 import * as companyUtils from '../../utils/companyUtils';
 import { faker } from '@faker-js/faker';
 import dayjs from 'dayjs';
@@ -50,7 +51,9 @@ export async function activateCard(cardId: number, cardCvv: string, password: st
 
 export async function viewTransactions(cardId: number){
     const card = await cardRepository.findById(cardId);
-    console.log(card)
+    const cardInfos = await getRechargesAndBalance(cardId);
+    console.log(cardInfos)
+    return cardInfos;
 }
 
 

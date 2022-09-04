@@ -30,9 +30,9 @@ export async function activateCard(req: Request, res: Response){
 export async function viewTransactions(req: Request, res: Response){
     const cardId = req.params.cardId;
     try{
-        await cardService.viewTransactions(Number(cardId));
+        const cardInfos = await cardService.viewTransactions(Number(cardId));
 
-        res.sendStatus(200);
+        res.status(200).send(cardInfos);
 
     }catch(e: any){
         if(!e.code) return res.sendStatus(500);
