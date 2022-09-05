@@ -84,3 +84,10 @@ export function generateCardCredentials(){
     }
     return credentials;
 }
+
+
+export function checkIsVirtual(isVirtual: boolean){
+    if(isVirtual){
+        return throwError(401, 'The card cannot be virtual');
+    }
+}

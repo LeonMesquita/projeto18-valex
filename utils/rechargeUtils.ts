@@ -2,7 +2,7 @@ import * as rechargeRepository from '../src/repositories/rechargeRepository';
 import * as paymentRepository from '../src/repositories/paymentRepository';
 
 
-export async function getRechargesAndBalance(cardId: number){
+export async function getRechargesAndBalance(cardId: any){
     const recharges = await rechargeRepository.findByCardId(cardId);
     const transactions = await paymentRepository.findByCardId(cardId);
     
