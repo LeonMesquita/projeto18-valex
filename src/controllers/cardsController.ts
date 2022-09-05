@@ -6,11 +6,25 @@ export async function createCard(req: Request, res: Response){
     try{
         await cardService.createCard(req.headers['x-api-key'], Number(cardBody.employeeId), cardBody.cardType);
         res.sendStatus(201);
-    }catch(e){
-        console.log(e)
-        res.sendStatus(500);
+    }catch(e: any){
+        if(!e.code) return res.sendStatus(500);
+        return res.status(e.code).send(e.message);
     }
 }
+
+
+export async function createVirtualCard(req: Request, res: Response){
+    const cardBody: {originalId: number , password: string} = req.body;
+    try{
+        await cardService.createVirtualCard(cardBody.originalId, cardBody.password);
+        res.sendStatus(201);
+    }catch(e: any){
+        if(!e.code) return res.sendStatus(500);
+        return res.status(e.code).send(e.message);
+    }
+}
+
+
 
 
 export async function activateCard(req: Request, res: Response){
@@ -65,9 +79,9 @@ export async function unblockCard(req: Request, res: Response){
 
 
 export async function rechargeCard(req: Request, res: Response){
-    const recharge: {apiKey: string, cardId: number | string, amount: number | string} = req.body;
+    const recharge: {cardId: number | string, amount: number | string} = req.body;
     try{
-        await cardService.rechargeCard(recharge.apiKey, Number(recharge.cardId), Number(recharge.amount));
+        await cardService.rechargeCard(req.headers['x-api-key'], Number(recharge.cardId), Number(recharge.amount));
         res.sendStatus(201);
     }catch(e: any){
         if(!e.code) return res.sendStatus(500);

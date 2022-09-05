@@ -1,9 +1,8 @@
 import * as cardRepository from '../repositories/cardRepository';
-import * as companyRepository from '../repositories/companyRepository';
 import * as employeeRepository from '../repositories/employeeRepository';
 import * as rechargeRepository from '../repositories/rechargeRepository';
 import {throwError, checkDataExists} from '../../utils/throwError';
-import { checkIsExpired, setHolderName, checkCardValidity } from '../../utils/cardUtils';
+import { checkIsExpired, setHolderName, checkCardValidity, getCardById, validatePassword, generateCardCredentials } from '../../utils/cardUtils';
 import { getRechargesAndBalance } from '../../utils/rechargeUtils';
 import * as companyUtils from '../../utils/companyUtils';
 import { faker } from '@faker-js/faker';
@@ -17,17 +16,15 @@ export async function createCard(apiKey: any, employeeId: number, cardType: any)
     const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const employee = await employeeRepository.findById(employeeId);
     checkDataExists(employee, 'Employee');
-    const number: string = faker.finance.account();
     const cardholderName = setHolderName(employee.fullName.split(' '));
-    const expirationDate =  `${dayjs().month()}/${dayjs().year()+5}`;
-    const securityCode = cryptr.encrypt(faker.finance.creditCardCVV());
+    const cardCredentials = generateCardCredentials();
 
     const cardData = {
         employeeId,
-        number,
+        number: cardCredentials.number,
         cardholderName,
-        securityCode,
-        expirationDate,
+        securityCode: cardCredentials.securityCode,
+        expirationDate: cardCredentials.expirationDate,
         isVirtual: false,
         isBlocked: false,
         type: cardType
@@ -37,7 +34,38 @@ export async function createCard(apiKey: any, employeeId: number, cardType: any)
 
 
 
+
+
+
+
+export async function createVirtualCard(originalId: number, password: string){
+    const originalCard = await getCardById(originalId);
+    validatePassword(originalCard.password, password);
+    const cardCredentials = generateCardCredentials();
+
+
+    const virtualCard = {
+        ...originalCard,
+        number: cardCredentials.number,
+        securityCode: cardCredentials.securityCode,
+        expirationDate: cardCredentials.expirationDate,
+        isVirtual: true,
+        originalCardId: originalId
+    }
+    console.log(virtualCard);
+    cardRepository.insert(virtualCard);
+}
+
+
+
+
+
+
+
+
+
 export async function activateCard(cardId: number, cardCvv: string, password: string){
+    if(password.length !== 4 || !Number(password)) throwError(400, 'Invalid password');
     const card = await cardRepository.findById(cardId);
     checkDataExists(card, 'Card');
     checkIsExpired(card.expirationDate);
@@ -79,7 +107,7 @@ export async function blockAndUnblock(cardId: number, password: string, operatio
 
 
 
-export async function rechargeCard(apiKey: string, cardId: number, amount: number){
+export async function rechargeCard(apiKey: any, cardId: number, amount: number){
     const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const card = await checkCardValidity(cardId);
     const employee = await companyUtils.checkIsCompanyEmployee(card.employeeId, company.id);

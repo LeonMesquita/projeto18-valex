@@ -4,17 +4,32 @@ dayjs.extend(relativeTime);
 import { throwError } from './throwError';
 import * as cardRepository from '.././src/repositories/cardRepository';
 import { checkDataExists } from './throwError';
+import Cryptr from 'cryptr';
+const cryptr = new Cryptr('myTotallySecretKey');
+import { faker } from '@faker-js/faker';
 
 
-export async function checkCardValidity(cardId: number){
+
+export async function getCardById(cardId: number){
     const card = await cardRepository.findById(cardId);
     checkDataExists(card, 'Card');
-    if(card.password === null) throwError(401, 'The card is not active');
-    checkIsExpired(card.expirationDate);
-
     return card;
 }
 
+
+export async function checkCardValidity(cardId: number){
+    const card = await getCardById(cardId);
+    if(card.password === null) throwError(401, 'The card is not active');
+    checkIsExpired(card.expirationDate);
+    return card;
+}
+
+
+
+export function validatePassword(cardPassword: string | undefined, password: string){
+    if(!cardPassword) return throwError(401, 'The card is not activated');
+    if(password !== cryptr.decrypt(cardPassword)) return throwError(401, 'Incorrect password');
+}
 
 
 
@@ -54,4 +69,18 @@ export function setHolderName(nameArr: string[]) :string{
     }
     cardholderName += ` ${nameArr[nameArr.length-1]}`;
      return cardholderName.toUpperCase();
+}
+
+
+export function generateCardCredentials(){
+    const number: string = faker.finance.account();
+    const expirationDate: string =  `${dayjs().month()}/${dayjs().year()+5}`;
+    const securityCode: string = cryptr.encrypt(faker.finance.creditCardCVV());
+
+    const credentials = {
+        number,
+        expirationDate,
+        securityCode
+    }
+    return credentials;
 }
