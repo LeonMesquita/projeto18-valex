@@ -10,7 +10,7 @@ const cryptr = new Cryptr('myTotallySecretKey');
 
 
 export async function createCard(apiKey: any, employeeId: number, cardType: any){
-    throwError(400, 'aaaa')
+    
     const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const employee = await employeeRepository.findById(employeeId);
     checkDataExists(employee, 'Employee');
@@ -28,6 +28,10 @@ export async function createCard(apiKey: any, employeeId: number, cardType: any)
         type: cardType
     }
     cardRepository.insert(cardData);
+
+    return({
+        cvv: cryptr.decrypt(cardCredentials.securityCode)
+    });
 }
 
 
@@ -49,6 +53,10 @@ export async function createVirtualCard(originalId: number, password: string){
         originalCardId: originalId
     }
     cardRepository.insert(virtualCard);
+
+    return({
+        cvv: cryptr.decrypt(cardCredentials.securityCode)
+    });
 }
 
 

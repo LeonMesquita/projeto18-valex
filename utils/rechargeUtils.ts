@@ -1,6 +1,6 @@
 import * as rechargeRepository from '../src/repositories/rechargeRepository';
 import * as paymentRepository from '../src/repositories/paymentRepository';
-
+import dayjs from 'dayjs';
 
 export async function getRechargesAndBalance(cardId: any){
     const recharges = await rechargeRepository.findByCardId(cardId);
@@ -8,14 +8,29 @@ export async function getRechargesAndBalance(cardId: any){
     
     let balance: number = 0;
     let totalPaid: number = 0;
-    recharges.forEach(recharge => balance += recharge.amount);
-    transactions.forEach(payment => totalPaid += payment.amount);
+
+    const newRecharges: object[] = [];
+    const newTransactions: object[] = []
+
+    recharges.forEach(recharge => {
+        balance += recharge.amount;
+        newRecharges.push({...recharge,
+        timestamp: dayjs(recharge.timestamp).format("DD/MM/YYYY")
+        });
+    });
+    transactions.forEach(payment => {
+        totalPaid += payment.amount;
+        newTransactions.push({...payment,
+            timestamp: dayjs(payment.timestamp).format("DD/MM/YYYY")
+            });
+    });
+
 
     balance -= totalPaid;
-    console.log(balance)
+   
     return({
         balance,
-        transactions,
-        recharges
+        transactions: newTransactions,
+        recharges: newRecharges
     });
 }

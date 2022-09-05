@@ -67,7 +67,8 @@ export function setHolderName(nameArr: string[]) :string{
             }
         }
     }
-    cardholderName += ` ${nameArr[nameArr.length-1]}`;
+    if(nameArr.length >= 2) cardholderName += ` ${nameArr[nameArr.length-1]}`;
+    
      return cardholderName.toUpperCase();
 }
 

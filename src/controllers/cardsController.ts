@@ -3,21 +3,21 @@ import * as cardService from '../services/cardService';
 
 export async function createCard(req: Request, res: Response){
     const cardBody: {employeeId: number , cardType: string} = req.body;
-    //try{
-        await cardService.createCard(req.headers['x-api-key'], cardBody.employeeId, cardBody.cardType);
-        res.sendStatus(201);
-    // }catch(e: any){
-    //     if(!e.code) return res.sendStatus(500);
-    //     return res.status(e.code).send(e.message);
-    // }
+    try{
+        const cvv = await cardService.createCard(req.headers['x-api-key'], cardBody.employeeId, cardBody.cardType);
+        res.status(201).send(cvv);
+    }catch(e: any){
+        if(!e.code) return res.sendStatus(500);
+        return res.status(e.code).send(e.message);
+    }
 }
 
 
 export async function createVirtualCard(req: Request, res: Response){
     const cardBody: {originalId: number , password: string} = req.body;
     try{
-        await cardService.createVirtualCard(cardBody.originalId, cardBody.password);
-        res.sendStatus(201);
+        const cvv = await cardService.createVirtualCard(cardBody.originalId, cardBody.password);
+        res.status(201).send(cvv);
     }catch(e: any){
         if(!e.code) return res.sendStatus(500);
         return res.status(e.code).send(e.message);
@@ -51,9 +51,9 @@ export async function activateCard(req: Request, res: Response){
     }
 }
 
-///
-////
-/////
+
+
+
 export async function viewTransactions(req: Request, res: Response){
     const cardId = req.params.cardId;
     try{
@@ -68,16 +68,20 @@ export async function viewTransactions(req: Request, res: Response){
 }
 
 
+
+
 export async function blockCard(req: Request, res: Response){
-    const cardBody: {cardId: number | string, password: string} = req.body;
+    const cardBody: {cardId: number, password: string} = req.body;
     try{
-        await cardService.blockAndUnblock(Number(cardBody.cardId), cardBody.password, 'block');
+        await cardService.blockAndUnblock(cardBody.cardId, cardBody.password, 'block');
         res.sendStatus(200);
     }catch(e: any){
         if(!e.code) return res.sendStatus(500);
         return res.status(e.code).send(e.message);
     }
 }
+
+
 
 export async function unblockCard(req: Request, res: Response){
     const cardBody: {cardId: number, password: string} = req.body;
