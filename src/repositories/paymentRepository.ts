@@ -1,3 +1,4 @@
+import { number } from "joi";
 import { connection } from "../config/database";
 
 export interface Payment {
@@ -32,4 +33,9 @@ export async function insert(paymentData: PaymentInsertData) {
     `INSERT INTO payments ("cardId", "businessId", amount) VALUES ($1, $2, $3)`,
     [cardId, businessId, amount]
   );
+}
+
+
+export async function deletePayments(cardId: number){
+  connection.query(`DELETE FROM payments WHERE "cardId"=$1`, [cardId]);
 }

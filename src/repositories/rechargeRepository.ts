@@ -25,3 +25,8 @@ export async function insert(rechargeData: RechargeInsertData) {
     [cardId, amount]
   );
 }
+
+
+export async function deleteRecharges(cardId: number){
+  connection.query(`DELETE FROM recharges WHERE "cardId"=$1`, [cardId]);
+}

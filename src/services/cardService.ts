@@ -1,10 +1,11 @@
 import * as cardRepository from '../repositories/cardRepository';
 import * as employeeRepository from '../repositories/employeeRepository';
+import * as paymentRepository from '../repositories/paymentRepository';
+import * as rechargeRepository from '../repositories/rechargeRepository';
 import {throwError, checkDataExists} from '../../utils/throwError';
 import * as cardUtils from '../../utils/cardUtils';
 import { getRechargesAndBalance } from '../../utils/rechargeUtils';
 import * as companyUtils from '../../utils/companyUtils';
-import { faker } from '@faker-js/faker';
 import Cryptr from 'cryptr';
 const cryptr = new Cryptr('myTotallySecretKey');
 
@@ -37,11 +38,9 @@ export async function createCard(apiKey: any, employeeId: number, cardType: any)
 
 
 
-
-
-
 export async function createVirtualCard(originalId: number, password: string){
     const originalCard = await cardUtils.getCardById(originalId);
+    if(originalCard.isVirtual) return throwError(401, 'The original card cannot be virtual');
     cardUtils.validatePassword(originalCard.password, password);
     const cardCredentials = cardUtils.generateCardCredentials('mastercard');
     const virtualCard = {
@@ -60,14 +59,16 @@ export async function createVirtualCard(originalId: number, password: string){
 }
 
 
+
+
 export async function deleteVirtualCard(cardId: number, password: string){
     const card = await cardUtils.getCardById(cardId);
     cardUtils.validatePassword(card.password, password);
     if(!card.isVirtual) return throwError(401, 'The card must be virtual');
-    await cardRepository.remove(cardId);
+    await rechargeRepository.deleteRecharges(cardId);
+    await paymentRepository.deletePayments(cardId);
+    await cardRepository.remove(card.id);
 }
-
-
 
 
 
@@ -86,7 +87,7 @@ export async function activateCard(cardId: number, cardCvv: string, password: st
 
 
 export async function viewTransactions(cardId: number){
-    const card = await cardRepository.findById(cardId);
+    const card = await cardUtils.getCardById(cardId);
     const cardInfos = await getRechargesAndBalance(cardId);
     console.log(cardInfos)
     return cardInfos;
