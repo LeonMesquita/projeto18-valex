@@ -25,6 +25,19 @@ export async function createVirtualCard(req: Request, res: Response){
 }
 
 
+export async function deleteVirtualCard(req: Request, res: Response){
+    const cardBody: {cardId: number , password: string} = req.body;
+    try{
+       await cardService.deleteVirtualCard(cardBody.cardId, cardBody.password);
+        res.sendStatus(200);
+    }catch(e: any){
+        if(!e.code) return res.sendStatus(500);
+        return res.status(e.code).send(e.message);
+    }
+}
+
+
+
 
 
 export async function activateCard(req: Request, res: Response){

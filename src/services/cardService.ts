@@ -42,8 +42,6 @@ export async function createVirtualCard(originalId: number, password: string){
     const originalCard = await getCardById(originalId);
     validatePassword(originalCard.password, password);
     const cardCredentials = generateCardCredentials();
-
-
     const virtualCard = {
         ...originalCard,
         number: cardCredentials.number,
@@ -52,12 +50,16 @@ export async function createVirtualCard(originalId: number, password: string){
         isVirtual: true,
         originalCardId: originalId
     }
-    console.log(virtualCard);
     cardRepository.insert(virtualCard);
 }
 
 
-
+export async function deleteVirtualCard(cardId: number, password: string){
+    const card = await getCardById(cardId);
+    validatePassword(card.password, password);
+    if(!card.isVirtual) return throwError(401, 'The card must be virtual');
+    await cardRepository.remove(cardId);
+}
 
 
 
