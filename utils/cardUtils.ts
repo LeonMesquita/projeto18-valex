@@ -73,8 +73,8 @@ export function setHolderName(nameArr: string[]) :string{
 }
 
 
-export function generateCardCredentials(){
-    const number: string = faker.finance.account();
+export function generateCardCredentials(cardFlag: string){
+    const number: string = faker.finance.creditCardNumber(cardFlag)
     const expirationDate: string =  `${dayjs().month()}/${dayjs().year()+5}`;
     const securityCode: string = cryptr.encrypt(faker.finance.creditCardCVV());
 

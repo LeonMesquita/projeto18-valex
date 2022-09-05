@@ -4,18 +4,18 @@ import {throwError, checkDataExists} from '../../utils/throwError';
 import * as cardUtils from '../../utils/cardUtils';
 import { getRechargesAndBalance } from '../../utils/rechargeUtils';
 import * as companyUtils from '../../utils/companyUtils';
+import { faker } from '@faker-js/faker';
 import Cryptr from 'cryptr';
 const cryptr = new Cryptr('myTotallySecretKey');
 
 
 
-export async function createCard(apiKey: any, employeeId: number, cardType: any){
-    
+export async function createCard(apiKey: any, employeeId: number, cardType: any){    
     const company = await companyUtils.checkCompanyByApiKey(apiKey);
     const employee = await employeeRepository.findById(employeeId);
     checkDataExists(employee, 'Employee');
     const cardholderName = cardUtils.setHolderName(employee.fullName.split(' '));
-    const cardCredentials = cardUtils.generateCardCredentials();
+    const cardCredentials = cardUtils.generateCardCredentials('');
 
     const cardData = {
         employeeId,
@@ -43,7 +43,7 @@ export async function createCard(apiKey: any, employeeId: number, cardType: any)
 export async function createVirtualCard(originalId: number, password: string){
     const originalCard = await cardUtils.getCardById(originalId);
     cardUtils.validatePassword(originalCard.password, password);
-    const cardCredentials = cardUtils.generateCardCredentials();
+    const cardCredentials = cardUtils.generateCardCredentials('mastercard');
     const virtualCard = {
         ...originalCard,
         number: cardCredentials.number,
