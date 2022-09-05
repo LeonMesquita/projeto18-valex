@@ -8,8 +8,9 @@ const cryptr = new Cryptr('myTotallySecretKey');
 
 
 export async function makePurchase(cardId: number, password: string, businessId: number, amount: number, purchaseType: string){
-   if(purchaseType !== "POS" && purchaseType !== "online") return throwError(400, 'Invalid purchase type');
+   
    const card = await cardUtils.checkCardValidity(cardId);
+   const originalId: number = purchaseType === "POS" ? cardId : card.originalCardId!;
    if(card.isBlocked) throwError(401, 'The card is blocked');
    cardUtils.validatePassword(card.password, password);
    if(purchaseType === "POS"){
@@ -20,7 +21,7 @@ export async function makePurchase(cardId: number, password: string, businessId:
    checkDataExists(business, 'Business');
    if(business.type !== card.type) throwError(401, 'Invalid type of business');
 
-   const originalId: number = purchaseType === "POS" ? cardId : card.originalCardId!;
+   
 
    const cardInfo = await rechargeUtils.getRechargesAndBalance(originalId);
    if(cardInfo.balance < amount) throwError(401, 'Insufficient balance');
